@@ -8,8 +8,7 @@ from asteroidfield import AsteroidField
 from shot import Shot
 from explosion import Explosion
 from shieldpowerup import ShieldPowerup
-
-
+from speedpowerup import SpeedPowerup
 
 
 def main():
@@ -19,6 +18,8 @@ def main():
     score = 0
     lives = 3
     next_shield_timer = random.uniform(10, 20)
+    next_speed_timer = random.uniform(12, 22)
+
 
     font = pygame.font.SysFont(None, 36)
 
@@ -34,6 +35,8 @@ def main():
     Shot.containers = (shots, updatable, drawable)
     AsteroidField.containers = updatable
     ShieldPowerup.containers = (updatable, drawable)
+    SpeedPowerup.containers = (updatable, drawable)
+
 
     asteroid_field = AsteroidField()
 
@@ -49,15 +52,26 @@ def main():
                 return
 
         updatable.update(dt)
+        next_speed_timer -= dt
+        if next_speed_timer <= 0:
+            x = random.randint(50, SCREEN_WIDTH - 50)
+            y = random.randint(50, SCREEN_HEIGHT - 50)
+            SpeedPowerup(x, y)
+            next_speed_timer = random.uniform(12, 22)
+
 
         for obj in updatable:
             if isinstance(obj, ShieldPowerup):
-                dist = (player.position - obj.position).length()
-                if dist < PLAYER_RADIUS + 10:
+                if (player.position - obj.position).length() < PLAYER_RADIUS + 10:
                     obj.kill()
                     player.invulnerable = True
                     player.invulnerable_timer = 5.0
 
+            if isinstance(obj, SpeedPowerup):
+                if (player.position - obj.position).length() < PLAYER_RADIUS + 10:
+                    obj.kill()
+                    player.speed_boost = True
+                    player.speed_boost_timer = 5.0
 
         for asteroid in asteroids:
             if not player.invulnerable and asteroid.collides_with(player):

@@ -16,6 +16,11 @@ class Player(CircleShape):
         self.invulnerable = False
         self.invulnerable_timer = 0
 
+        self.speed_boost = False
+        self.speed_boost_timer = 0
+        self.default_acceleration = 300
+        self.acceleration = self.default_acceleration
+
 
 
     def draw(self, screen):
@@ -39,6 +44,13 @@ class Player(CircleShape):
             self.invulnerable_timer -= dt
             if self.invulnerable_timer <= 0:
                 self.invulnerable = False
+
+        if self.speed_boost:
+            self.speed_boost_timer -= dt
+            self.acceleration = self.default_acceleration * 2  # doppelte Beschleunigung
+            if self.speed_boost_timer <= 0:
+                self.speed_boost = False
+                self.acceleration = self.default_acceleration
 
         keys = pygame.key.get_pressed()
 
