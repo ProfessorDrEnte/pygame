@@ -7,10 +7,15 @@ from shot import Shot
 class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
+        self.velocity = pygame.Vector2(0, 0)
+        self.acceleration = 300
+        self.friction = 0.98
+
         self.rotation = 0
         self.shoot_timer = 0
         self.invulnerable = False
         self.invulnerable_timer = 0
+
 
 
     def draw(self, screen):
@@ -28,23 +33,36 @@ class Player(CircleShape):
         return [a, b, c]
     
     def update(self, dt):
+        # Update cooldowns & Timers
         self.shoot_timer -= dt
-        keys = pygame.key.get_pressed()
         if self.invulnerable:
             self.invulnerable_timer -= dt
             if self.invulnerable_timer <= 0:
                 self.invulnerable = False
 
+        keys = pygame.key.get_pressed()
+
+        # Movement Input
         if keys[pygame.K_w]:
-            self.move(dt)
+            self.move(dt, 1)
         if keys[pygame.K_s]:
-            self.move(-dt)
+            self.move(dt, -1)
         if keys[pygame.K_a]:
             self.rotate(-dt)
         if keys[pygame.K_d]:
             self.rotate(dt)
+
+        # Shooting
         if keys[pygame.K_SPACE]:
             self.shoot()
+
+        # Apply velocity & friction
+        self.position += self.velocity * dt
+        self.velocity *= self.friction
+
+        # Wrap around screen
+        self.wrap_around()
+
 
     def shoot(self):
         if self.shoot_timer > 0:
@@ -57,10 +75,10 @@ class Player(CircleShape):
     def rotate(self, dt):
         self.rotation += PLAYER_TURN_SPEED * dt
 
-    def move(self, dt):
+    def move(self, dt, direction=1):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        self.position += forward * PLAYER_SPEED * dt
-        self.wrap_around()
+        self.velocity += forward * self.acceleration * dt * direction
+
 
     def wrap_around(self):
         if self.position.x > SCREEN_WIDTH:
