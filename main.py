@@ -5,6 +5,8 @@ from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
+from explosion import Explosion
+
 
 
 def main():
@@ -14,12 +16,14 @@ def main():
     score = 0
     lives = 3
     font = pygame.font.SysFont(None, 36)
+    
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
     shots = pygame.sprite.Group()
 
+    Explosion.containers = (updatable, drawable)
     Asteroid.containers = (asteroids, updatable, drawable)
     Shot.containers = (shots, updatable, drawable)
     AsteroidField.containers = updatable
@@ -54,6 +58,7 @@ def main():
                     score += 100
                     shot.kill()
                     asteroid.split()
+                    Explosion(asteroid.position)
 
         background = pygame.image.load("heic1304c.jpg").convert()
         screen.blit(background, (0, 0))
