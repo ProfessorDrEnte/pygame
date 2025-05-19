@@ -1,11 +1,14 @@
 import sys
 import pygame
+import random
 from constants import *
 from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from shot import Shot
 from explosion import Explosion
+from shieldpowerup import ShieldPowerup
+
 
 
 
@@ -15,7 +18,10 @@ def main():
     clock = pygame.time.Clock()
     score = 0
     lives = 3
+    next_shield_timer = random.uniform(10, 20)
+
     font = pygame.font.SysFont(None, 36)
+
     
 
     updatable = pygame.sprite.Group()
@@ -27,6 +33,8 @@ def main():
     Asteroid.containers = (asteroids, updatable, drawable)
     Shot.containers = (shots, updatable, drawable)
     AsteroidField.containers = updatable
+    ShieldPowerup.containers = (updatable, drawable)
+
     asteroid_field = AsteroidField()
 
     Player.containers = (updatable, drawable)
@@ -41,6 +49,15 @@ def main():
                 return
 
         updatable.update(dt)
+
+        for obj in updatable:
+            if isinstance(obj, ShieldPowerup):
+                dist = (player.position - obj.position).length()
+                if dist < PLAYER_RADIUS + 10:
+                    obj.kill()
+                    player.invulnerable = True
+                    player.invulnerable_timer = 5.0
+
 
         for asteroid in asteroids:
             if not player.invulnerable and asteroid.collides_with(player):
@@ -59,6 +76,9 @@ def main():
                     shot.kill()
                     asteroid.split()
                     Explosion(asteroid.position)
+
+                    if random.random() < 0.2:
+                        ShieldPowerup(asteroid.position.x, asteroid.position.y)
 
         background = pygame.image.load("heic1304c.jpg").convert()
         screen.blit(background, (0, 0))
