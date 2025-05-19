@@ -11,6 +11,9 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
+    score = 0
+    lives = 3
+    font = pygame.font.SysFont(None, 36)
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
@@ -36,19 +39,32 @@ def main():
         updatable.update(dt)
 
         for asteroid in asteroids:
-            if asteroid.collides_with(player):
-                print("Game over!")
-                sys.exit()
+            if not player.invulnerable and asteroid.collides_with(player):
+                lives -= 1
+                if lives <= 0:
+                    print("Game Over!")
+                    sys.exit()
+                else:
+                    player.respawn()
+
+
 
             for shot in shots:
                 if asteroid.collides_with(shot):
+                    score += 100
                     shot.kill()
                     asteroid.split()
 
-        screen.fill("black")
+        background = pygame.image.load("heic1304c.jpg").convert()
+        screen.blit(background, (0, 0))
 
         for obj in drawable:
             obj.draw(screen)
+        
+        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+        lives_text = font.render(f"Lives: {lives}", True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
+        screen.blit(lives_text, (10, 40))
 
         pygame.display.flip()
 
