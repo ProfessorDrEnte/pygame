@@ -21,6 +21,9 @@ class Player(CircleShape):
         self.default_acceleration = 300
         self.acceleration = self.default_acceleration
 
+        self.weapon_type = 1 
+
+
 
 
     def draw(self, screen):
@@ -38,6 +41,12 @@ class Player(CircleShape):
         return [a, b, c]
     
     def update(self, dt):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_1]:
+            self.weapon_type = 1
+        if keys[pygame.K_2]:
+            self.weapon_type = 2
+
         # Update cooldowns & Timers
         self.shoot_timer -= dt
         if self.invulnerable:
@@ -79,9 +88,22 @@ class Player(CircleShape):
     def shoot(self):
         if self.shoot_timer > 0:
             return
+
         self.shoot_timer = PLAYER_SHOOT_COOLDOWN
-        shot = Shot(self.position.x, self.position.y)
-        shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
+        direction = pygame.Vector2(0, 1).rotate(self.rotation)
+
+        if self.weapon_type == 1:
+            # Standard
+            shot = Shot(self.position.x, self.position.y)
+            shot.velocity = direction * PLAYER_SHOOT_SPEED
+
+        elif self.weapon_type == 2:
+            # Streuschuss – 3 Kugeln in verschiedenen Winkeln
+            for angle in [-15, 0, 15]:
+                dir_rotated = pygame.Vector2(0, 1).rotate(self.rotation + angle)
+                shot = Shot(self.position.x, self.position.y)
+                shot.velocity = dir_rotated * PLAYER_SHOOT_SPEED
+
 
 
     def rotate(self, dt):
